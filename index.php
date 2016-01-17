@@ -54,7 +54,6 @@ if(empty($_POST['guess'])){
 function displayLeaderboard($pdo){
     $stmt = $pdo->prepare("SELECT login, best_score from user ORDER BY `best_score` LIMIT 0,10");
     $stmt->execute();
-
     echo('<table border="1px">');
     echo('<th>name</th><th>Score</th>');
     while($result = $stmt->fetch()){

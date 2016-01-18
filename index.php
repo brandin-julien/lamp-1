@@ -12,7 +12,8 @@ if(empty($_SESSION['choice']) || isset($_POST['reset'])){
     saveGame($pdo);
 }else{
     $choice = $_SESSION['choice'];
-    $_SESSION['score'] = $recup['score'];$_SESSION['response'] = $recup['response'];
+    $_SESSION['score'] = $recup['score'];
+    $_SESSION['response'] = $recup['response'];
 }
 
 if(!isset($_SESSION['user'])){
@@ -54,6 +55,7 @@ if(empty($_POST['guess'])){
 function displayLeaderboard($pdo){
     $stmt = $pdo->prepare("SELECT login, best_score from user ORDER BY `best_score` LIMIT 0,10");
     $stmt->execute();
+
     echo('<table border="1px">');
     echo('<th>name</th><th>Score</th>');
     while($result = $stmt->fetch()){
@@ -86,10 +88,15 @@ function saveGame($pdo){
     $stmt->bindParam("id", $_SESSION['id']);
     $stmt->execute();
     $result = $stmt->fetch();
+    $stmt = $pdo->prepare("UPDATE user SET `guess` = :guess where id = :id");
+    $stmt->bindParam("guess", $_POST['guess']);
+    $stmt->bindParam("id", $_SESSION['id']);
+    $stmt->execute();
+    $result = $stmt->fetch();
 }
 
 function recupSave($pdo){
-    $stmt = $pdo->prepare("SELECT score, choice, response FROM `user` WHERE id = :id");
+    $stmt = $pdo->prepare("SELECT score, choice, response, guess FROM `user` WHERE id = :id");
     $stmt->bindParam("id", $_SESSION['id']);
     $stmt->execute();
     $result = $stmt->fetch();
@@ -120,8 +127,8 @@ Nombre de coup : <?php echo $_SESSION['score']; ?><br>
     <input type="submit" name="reset" value="reset">
     <input type="submit" name="reset_best" value="reset best">
 </form>
+<em>Tu as testé avec <?php echo $recup['guess']?>)</em><br>
 <em>(La réponse est <?php echo $choice?>)</em>
-
 
 <form method="POST" action="/login.php">
     <input type="submit" name="logout" value="Logout">
